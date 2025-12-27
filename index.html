@@ -12,9 +12,15 @@
         .reel-col { display: flex; flex-direction: column; align-items: center; flex: 1; }
         .reel-title { font-size: 0.95rem; color: #ffd700; margin-bottom: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1.5px; text-shadow: 2px 2px 4px #000; }
         .reel { width: 100%; height: 220px; background: #fff; border-radius: 12px; overflow: hidden; display: flex; justify-content: center; align-items: center; border: 4px solid #222; box-sizing: border-box; box-shadow: inset 0 0 20px rgba(0,0,0,0.15), 0 0 15px rgba(255,255,255,0.4); position: relative; }
-        .reel img { width: 100%; height: 100%; object-fit: contain; padding: 8px; z-index: 1; opacity: 1; transition: opacity 0.5s ease-in-out; }
-        .fade-in { animation: fadeInImg 0.5s forwards; }
-        @keyframes fadeInImg { from { opacity: 0; } to { opacity: 1; } }
+        .reel img { width: 100%; height: 100%; object-fit: contain; padding: 8px; z-index: 1; position: relative; }
+        
+        /* Animación de deslizamiento suave */
+        .slide-down { animation: slideFromTop 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards; }
+        @keyframes slideFromTop {
+            0% { transform: translateY(-150%); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
         #spinBtn { margin-top: 30px; padding: 18px 70px; font-size: 1.6rem; background: #e63946; color: white; border: none; border-radius: 50px; cursor: pointer; box-shadow: 0 6px #900; font-weight: bold; transition: 0.2s; }
         #spinBtn.reset-mode { background: #888 !important; box-shadow: 0 6px #555 !important; }
         #spinBtn:disabled { opacity: 0.6; cursor: not-allowed; }
@@ -54,40 +60,36 @@
     const categorias = Object.keys(options);
     let isSpinning = false;
     let isResetMode = false;
-    let results = ["", "", "", ""];
     let intervals = [null, null, null, null];
     const reels = [document.getElementById('reel1'), document.getElementById('reel2'), document.getElementById('reel3'), document.getElementById('reel4')];
     const btn = document.getElementById('spinBtn');
     const lever = document.getElementById('lever');
 
-    function setReelContent(reel, val, carpeta, soft = false) {
+    function setReelContent(reel, val, carpeta, slide = false) {
         const file = encodeURIComponent(val);
-        const imgClass = soft ? 'class="fade-in"' : '';
+        const imgClass = slide ? 'class="slide-down"' : '';
         reel.innerHTML = `<img src="${URL_BASE}${carpeta}/${file}.png" ${imgClass} onerror="this.outerHTML='<span style=\'color:black;font-size:0.6rem\'>${val}</span>'">`;
     }
 
     function resetToZero() {
         btn.disabled = true;
-        reels.forEach(reel => reel.classList.add('spinning'));
+        const nombresCero = ["PERSONA_CERO", "OBSERVAR_CERO", "ACTITUD_CERO", "RELIGION_CERO"];
         
-        setTimeout(() => {
-            reels.forEach(reel => reel.classList.remove('spinning'));
-            setReelContent(reels[0], "PERSONA_CERO", "CERO", true);
-            setReelContent(reels[1], "OBSERVAR_CERO", "CERO", true);
-            setReelContent(reels[2], "ACTITUD_CERO", "CERO", true);
-            setReelContent(reels[3], "RELIGION_CERO", "CERO", true);
-            btn.innerText = "GIRAR";
-            btn.classList.remove('reset-mode');
-            isResetMode = false;
-            btn.disabled = false;
-        }, 500);
+        reels.forEach((reel, i) => {
+            setTimeout(() => {
+                setReelContent(reel, nombresCero[i], "CERO", true);
+                if (i === 3) {
+                    btn.innerText = "GIRAR";
+                    btn.classList.remove('reset-mode');
+                    isResetMode = false;
+                    btn.disabled = false;
+                }
+            }, i * 150); // Efecto escalonado
+        });
     }
 
-    // Inicialización inmediata sin efecto
-    setReelContent(reels[0], "PERSONA_CERO", "CERO");
-    setReelContent(reels[1], "OBSERVAR_CERO", "CERO");
-    setReelContent(reels[2], "ACTITUD_CERO", "CERO");
-    setReelContent(reels[3], "RELIGION_CERO", "CERO");
+    // Inicio por defecto
+    reels.forEach((reel, i) => setReelContent(reel, ["PERSONA_CERO", "OBSERVAR_CERO", "ACTITUD_CERO", "RELIGION_CERO"][i], "CERO"));
 
     btn.onclick = () => {
         if (isResetMode) { resetToZero(); return; }
@@ -110,7 +112,6 @@
                 setTimeout(() => {
                     clearInterval(intervals[i]);
                     let finalVal = options[categorias[i]][Math.floor(Math.random()*options[categorias[i]].length)];
-                    results[i] = finalVal;
                     reel.classList.remove('spinning');
                     setReelContent(reel, finalVal, categorias[i]);
                     if(i === 3) { 
