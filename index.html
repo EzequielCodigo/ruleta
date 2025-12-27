@@ -1,9 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruleta de Predicación</title>
+    <style>
+        body { background: #1a1a1a; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: white; font-family: sans-serif; overflow: hidden; }
+        .machine-wrapper { display: flex; align-items: center; gap: 20px; scale: 0.8; }
+        .casino-container { text-align: center; background: #333; padding: 25px; border-radius: 20px; border: 6px solid #ffd700; box-shadow: 0 0 40px rgba(255, 215, 0, 0.2); width: 750px; }
+        .reels { display: flex; gap: 12px; justify-content: center; }
+        .reel-col { display: flex; flex-direction: column; align-items: center; flex: 1; }
+        .reel-title { font-size: 0.95rem; color: #ffd700; margin-bottom: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1.5px; text-shadow: 2px 2px 4px #000; }
+        .reel { width: 100%; height: 220px; background: #fff; border-radius: 12px; overflow: hidden; display: flex; justify-content: center; align-items: center; border: 4px solid #222; box-sizing: border-box; box-shadow: inset 0 0 20px rgba(0,0,0,0.15), 0 0 15px rgba(255,255,255,0.4); position: relative; }
+        .reel img { width: 100%; height: 100%; object-fit: contain; padding: 8px; z-index: 1; }
+        #spinBtn { margin-top: 30px; padding: 18px 70px; font-size: 1.6rem; background: #e63946; color: white; border: none; border-radius: 50px; cursor: pointer; box-shadow: 0 6px #900; font-weight: bold; transition: 0.2s; }
+        #spinBtn.reset-mode { background: #888 !important; box-shadow: 0 6px #555 !important; }
+        #spinBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .lever-container { width: 45px; height: 200px; background: #555; position: relative; border-radius: 8px; }
+        .lever-arm { width: 12px; height: 140px; background: #999; position: absolute; top: 30px; left: 16px; transform-origin: bottom center; transition: 0.3s; border-radius: 6px; }
+        .lever-ball { width: 35px; height: 35px; background: red; border-radius: 50%; position: absolute; top: -30px; left: -11px; box-shadow: inset -5px -5px 10px rgba(0,0,0,0.5); }
+        .lever-active .lever-arm { transform: rotate(150deg); }
+        .spinning { filter: blur(2px); animation: shakeReel 0.1s infinite; }
+        @keyframes shakeReel { 0% { transform: translateY(-1px); } 50% { transform: translateY(1px); } 100% { transform: translateY(-1px); } }
+    </style>
+</head>
+<body>
+
+<div class="machine-wrapper">
+    <div class="casino-container">
+        <div class="reels">
+            <div class="reel-col"><div class="reel-title">PERSONA</div><div id="reel1" class="reel"></div></div>
+            <div class="reel-col"><div class="reel-title">OBSERVAR</div><div id="reel2" class="reel"></div></div>
+            <div class="reel-col"><div class="reel-title">ACTITUD</div><div id="reel3" class="reel"></div></div>
+            <div class="reel-col"><div class="reel-title">RELIGION</div><div id="reel4" class="reel"></div></div>
+        </div>
+        <button id="spinBtn">GIRAR</button>
+    </div>
+    <div id="lever" class="lever-container"><div class="lever-arm"><div class="lever-ball"></div></div></div>
+</div>
+
 <script>
     const URL_BASE = "https://cdn.jsdelivr.net/gh/EzequielCodigo/ruleta/"; 
 
     const options = {
-        // Se cambió a PERSONAS para coincidir con tu carpeta de GitHub
-        PERSONAS: ["Anciana", "Anciano", "Comerciante", "Hombre", "Joven", "Madre", "Mujer", "Niño", "Padre", "Portero Electrico", "una Joven"],
+        PERSONA: ["Anciana", "Anciano", "Comerciante", "Hombre", "Joven", "Madre", "Mujer", "Niño", "Padre", "Portero Electrico", "una Joven"],
         OBSERVAR: ["Baston", "Cruz", "Desorden", "Jardin", "Juguetes", "Nada", "Profesional", "Rejas"],
         ACTITUD: ["APURADO", "CON VISITAS", "DEBATIDOR", "ENOJADO", "FERVIENTE", "MUCHO INTERÉS", "OCUPADO", "POCO INTERÉS", "RELAJADO", "SOBRADOR"],
         RELIGION: ["AGNÓSTICO", "ATEO", "BUDSTA", "CATÓLICO", "EVANGELÍCO", "EVOLUCIONISTA", "HIPIE", "JUDÍO", "MORMON", "NINGUNA", "Poco religioso", "SANTOS"]
@@ -25,15 +65,7 @@
 
     function resetToZero() {
         const nombresCero = ["PERSONA_CERO", "OBSERVAR_CERO", "ACTITUD_CERO", "RELIGION_CERO"];
-        // Aquí también se usa PERSONAS para la imagen inicial
-        reels.forEach((reel, i) => setReelContent(reel, nombresCero[i], i === 0 ? "PERSONAS" : categorias[i] === "PERSONAS" ? "PERSONAS" : categorias[i] || "CERO"));
-        
-        // Corrección específica para la carga inicial de la carpeta CERO
-        setReelContent(reels[0], "PERSONA_CERO", "CERO");
-        setReelContent(reels[1], "OBSERVAR_CERO", "CERO");
-        setReelContent(reels[2], "ACTITUD_CERO", "CERO");
-        setReelContent(reels[3], "RELIGION_CERO", "CERO");
-
+        reels.forEach((reel, i) => setReelContent(reel, nombresCero[i], "CERO"));
         btn.innerText = "GIRAR";
         btn.classList.remove('reset-mode');
         isResetMode = false;
@@ -76,3 +108,5 @@
         }
     };
 </script>
+</body>
+</html>
